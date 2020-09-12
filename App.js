@@ -1,14 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
 import React, {Component} from 'react';
 import { AppLoading } from 'expo';
-import { StyleSheet, View } from 'react-native';
-import { Container, Header, Title, Content, Footer, FooterTab, Button, Left, Right, Body, Icon, Text } from 'native-base';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
+import { StyleProvider } from "native-base";
 
-import Login from './src/Login';
-import Home from './src/Home';
-import Carrito from './src/Carrito';
+import App from "./src/App";
 
 class Autopartes extends Component{
     constructor(props) {
@@ -30,22 +26,10 @@ class Autopartes extends Component{
     render(){
         if (!this.state.isReady) {
             return <AppLoading />;
-        }        
-        
-        let result =
-           <Login />
-        
-        return(result)
+        }
+        let res =  <App />;
+        return(res);
     }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-});
 
 export default Autopartes
