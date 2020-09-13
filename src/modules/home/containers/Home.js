@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { StatusBar, StyleSheet, View, ImageBackground, Alert, ActivityIndicator, Image } from 'react-native';
-import { Container, Header, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Left, Right, Title, Picker } from 'native-base';
+import { Container, Header, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Left, Right, Title, Picker, Spinner } from 'native-base';
+import {decode, encode} from 'base-64'
 
 import HeaderDefault from '../components/Header';
 
@@ -18,7 +19,7 @@ export default class Home extends Component {
         fetch('http://modablackshop.tk/wp-json/wc/v3/products/categories',{ 
             method: 'GET',
             headers: new Headers({
-                'Authorization': 'Basic '+btoa('administrador:12345678'), 
+                'Authorization': 'Basic '+encode('administrador:12345678'), 
                 'Content-Type': 'application/x-www-form-urlencoded'
             }), 
         })
@@ -31,17 +32,17 @@ export default class Home extends Component {
                   isLoading: false
               },()=>{
 //                  console.log('seteo la variable');
-                  console.log(this.state.products);
+                  console.log(this.state.categories);
                 }
               );
           })
           .catch((error) => {
             console.error(error,"ERRRRRORRR");
           });
-        fetch('http://modablackshop.tk/wp-json/wc/v3/products',{ 
+        fetch('http://modablackshop.tk/wp-json/wc/v3/products?per_page=100',{ 
             method: 'GET',
             headers: new Headers({
-                'Authorization': 'Basic '+btoa('administrador:12345678'), 
+                'Authorization': 'Basic '+encode('administrador:12345678'), 
                 'Content-Type': 'application/x-www-form-urlencoded'
             }), 
         })
@@ -62,9 +63,32 @@ export default class Home extends Component {
             console.error(error,"ERRRRRORRR");
           });         
     }
-    onValueChange2(value: string) {
-        this.setState({
-          selected2: value
+    onValueChange2(value) {
+        this.setState({isLoading: true });
+        console.log(this.state.isLoading);        
+        fetch('http://modablackshop.tk/wp-json/wc/v3/products?category='+value,{ 
+            method: 'GET',
+            headers: new Headers({
+                'Authorization': 'Basic '+encode('administrador:12345678'), 
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }), 
+        })
+        .then(response => {              
+              return response.json();
+        })
+        .then(response =>{
+              this.setState({
+                  products: response,
+                  isLoading: false,
+                  selected2: value
+              },()=>{
+//                  console.log('seteo la variable');
+                  console.log(this.state.products);
+                }
+              );
+        })
+        .catch((error) => {
+            console.error(error,"ERRRRRORRR");
         });
       }
     render(){
@@ -81,26 +105,21 @@ export default class Home extends Component {
         let result = 
               <Container>                
                 <HeaderDefault />
-                <Content>
-                    <Item picker>
-                        <Picker
-                          mode="dropdown"
-                          iosIcon={<Icon name="arrow-down" />}
-                          style={{ width: undefined }}
-                          placeholder="Select your SIM"
-                          placeholderStyle={{ color: "#bfc6ea" }}
-                          placeholderIconColor="#007aff"
-                          selectedValue={this.state.selected2}
-                          onValueChange={this.onValueChange2.bind(this)}
-                        >
-                          <Picker.Item label="Wallet" value="key0" />
-                          <Picker.Item label="ATM Card" value="key1" />
-                          <Picker.Item label="Debit Card" value="key2" />
-                          <Picker.Item label="Credit Card" value="key3" />
-                          <Picker.Item label="Net Banking" value="key4" />
-                        </Picker>
-                    </Item>
-                </Content>
+                    <Form>
+                        <Item picker>
+                            <Picker
+                              style={{ width: undefined }}
+                              selectedValue={this.state.selected2}
+                              onValueChange={this.onValueChange2.bind(this)}
+                            >
+                            {
+                                this.state.categories.map((categories,i) => (
+                                    <Picker.Item label={categories.name} value={categories.id} />
+                                ))
+                            }
+                            </Picker>
+                        </Item>
+                    </Form>
                 <Content>
                  {
                     this.state.products.map((products,i) => (
