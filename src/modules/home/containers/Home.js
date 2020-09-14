@@ -16,7 +16,7 @@ export default class Home extends Component {
           selected2: undefined
         };
     }
-    componentDidMount = () => {
+    componentDidMount = () => {        
         fetch('http://modablackshop.tk/wp-json/wc/v3/products/categories',{ 
             method: 'GET',
             headers: new Headers({
@@ -62,7 +62,8 @@ export default class Home extends Component {
           })
           .catch((error) => {
             console.error(error,"ERRRRRORRR");
-          });         
+          }); 
+        this.valToCart();        
     }
     onValueChange2(value) {
         this.setState({isLoading: true });      
@@ -104,14 +105,16 @@ export default class Home extends Component {
                 return e.id==item.id
             })
             console.log(index)
-            if(index>0){
+            if(index>=0){
                 console.log(storage[index]);
                 storage[index].quantity = storage[index].quantity+1;
+                cart = storage;
             }else{
+                item.quantity = 1;
                 cart = storage.concat(item);
             }          
             console.log(cart);
-        }else{
+        }else{            
             item.quantity = 1;
             cart.push(item); 
         }
@@ -128,12 +131,35 @@ export default class Home extends Component {
             if(value !== null) {
               this.setState({
                  countCart: JSON.parse(value).length
+              },()=>{
+                  console.log('seteo contCart');
+                  console.log(this.state.countCart);
               });
             }
         }
+        this.props.navigation.addListener('didFocus', async () => {
+            let count = JSON.parse(await AsyncStorage.getItem('@cart'));
+            if(count && count.length==0){
+                console.log('a')
+                count = 0;
+            }else{
+                console.log('b');
+                console.log(count);
+                if(count){
+                    count = count.length;
+                }else{
+                    count = 0;
+                }
+                
+            }
+            this.setState({ countCart: count },()=>{
+                console.log('termino de setear');
+            });
+        });
     }
-    render(){
-        this.valToCart();
+    render(){        
+        const {navigate} = this.props.navigation;
+        console.log('2222')
         if(this.state.isLoading){
             return(
                 <Container>
@@ -142,7 +168,6 @@ export default class Home extends Component {
                 </Container>      
             )    
         }
-        const {navigate} = this.props.navigation;
         let result = 
               <Container>                
                 <HeaderDefault count={this.state.countCart} navigate={navigate}/>

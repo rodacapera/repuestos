@@ -28,6 +28,10 @@ const LoginNavigator = createStackNavigator({
     },
     Home: {
         screen: Home,
+        onGoBack: (param)=>{
+            console.log('sssssss');
+            console.log(param);
+        },
         navigationOptions: {
             headerShown: false,
             title: 'prueba'

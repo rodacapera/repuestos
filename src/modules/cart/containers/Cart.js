@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, Alert, Image, ActivityIndicator, AsyncStorage } from 'react-native';
-import { Container, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Right } from 'native-base';
+import { Container, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Badge, Right } from 'native-base';
 
 export default class Cart extends Component {
     constructor(props){
@@ -26,6 +26,27 @@ export default class Cart extends Component {
             this.setState({cart: JSON.parse(value), loader: false});
         }
     } 
+    async delete(id){
+        console.log('borrar: '+id);
+        const value = JSON.parse(await AsyncStorage.getItem('@cart'));
+        let index = value.findIndex((e)=>{return e.id==id});
+        console.log(index);
+        if(index !== -1){
+            console.log('removiendo indice: '+index);
+            console.log(value);
+            value.splice(index, 1);
+        }
+        console.log(value.length);
+        if(value.length<=0){
+            console.log('removiendo storage');
+            await AsyncStorage.removeItem('@cart');
+            this.props.navigation.goBack();
+        }else{
+            console.log('seteando storage');
+            await AsyncStorage.setItem('@cart', value);
+        }
+        this.setState({cart: value, loader: false, countCart: value.length});
+    }
     pay(){
         console.log('pagar');
         const items = null
@@ -81,6 +102,7 @@ export default class Cart extends Component {
     render(){
         this.getToCart();
         const {navigate} = this.props.navigation;
+        
         if(this.state.loader){
             return(
                 <Container>
@@ -88,7 +110,6 @@ export default class Cart extends Component {
                 </Container>      
             )    
         }
-        console.log(this);
         return(
                <Content padder contentContainerStyle={styles.content}>              
                     <Card style={{flex: 0}}>
@@ -96,9 +117,14 @@ export default class Cart extends Component {
                             this.state.cart.map((products,i) => (
                                 <CardItem key={i}>
                                   <Image source={{uri: products.images[0].src}} style={{height: 80, width: 80, flex: 1, resizeMode: 'cover', alignSelf: 'stretch'}}/>
+                                  <Button transparent style={{marginTop: 16}} onPress={()=>this.delete(products.id)}>
+                                        <Icon name="trash" style={{color: 'red'}} />
+                                  </Button>   
                                   <Text style={{width: 150}}>{products.name}</Text>
-                                  <Right>
+                                  <Badge success style={{width: 20, height: 20, paddingLeft: 0, paddingRight: 0}}>
                                     <Text>{products.quantity}</Text>
+                                  </Badge>
+                                  <Right>
                                     <Button transparent textStyle={{color: '#87838B'}} onPress={()=>this.props.navigation.navigate('Detail',{product: products})}>
                                         <Icon name="arrow-forward" />
                                     </Button>                                    
@@ -153,41 +179,11 @@ export default class Cart extends Component {
     }
 }
 const styles = StyleSheet.create({
-  textCenter: {
-    textAlign: 'center',
-    width: '100%',
-    fontWeight: 'bold',
-    fontSize: 19
-  },
-  content: {
-      flex: 1,
-      justifyContent: 'center',
-  },
-  bodyCard: {
-      borderColor: 'transparent',
-      borderStyle: 'dashed',
-      borderBottomColor: 'transparent',
-      borderTopColor: 'transparent',  
-      marginLeft: 40,
-      marginRight: 25
-  },
-  bgCardItem: {
-      backgroundColor: 'rgba(255, 255, 255, 0.6)',
-      borderColor: 'transparent',
-      borderStyle: 'dashed',
-      borderRadius: 0   
-  },
-  right: {
-    justifyContent: 'flex-end'
-  },
-  bgCard: {
-    borderRadius: 3,
-    borderColor: 'transparent',
-  },
-  container: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  badge: {
+        width: 20,
+        height: 20,
+        paddingLeft: 0,
+        paddingRight: 0,
+        color: 'green'
+  }
 })

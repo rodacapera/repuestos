@@ -1,8 +1,16 @@
 import React, {Component} from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Alert, AsyncStorage } from 'react-native';
 import { Header, Button, Icon, Left, Right, Body, Title, Badge, Text } from 'native-base';
 
 export default class HeaderDefault extends Component {
+    async validCart(){
+        let value = await AsyncStorage.getItem('@cart');
+        if(value === null){
+            Alert.alert('Tu carrito se encuentra vacío, no olvides agregar tus repuestos.');
+        }else{
+            this,navigate('Cart')
+        }
+    }
     render(){
         const {count} = this.props;
         const {navigate} = this.props;
@@ -37,7 +45,7 @@ export default class HeaderDefault extends Component {
                     <Title>Tienda</Title>                    
                   </Body>
                   <Right>
-                    <Button transparent onPress={()=>navigate('Login')}>
+                    <Button transparent onPress={()=>this.validCart()}>
                       <Icon name='cart' />
                     </Button>
                   </Right>
