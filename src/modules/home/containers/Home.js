@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { StatusBar, StyleSheet, View, ImageBackground, Alert, ActivityIndicator, Image } from 'react-native';
+import { StatusBar, StyleSheet, View, ImageBackground, Alert, ActivityIndicator, Image, AsyncStorage } from 'react-native';
 import { Container, Header, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Left, Right, Title, Picker, Spinner } from 'native-base';
 import {decode, encode} from 'base-64'
 
@@ -9,6 +9,7 @@ export default class Home extends Component {
     constructor(props){
         super(props);        
         this.state ={
+          countCart: 0, 
           products: [],
           categories: [],
           isLoading: true,
@@ -64,8 +65,7 @@ export default class Home extends Component {
           });         
     }
     onValueChange2(value) {
-        this.setState({isLoading: true });
-        console.log(this.state.isLoading);        
+        this.setState({isLoading: true });      
         fetch('http://modablackshop.tk/wp-json/wc/v3/products?category='+value,{ 
             method: 'GET',
             headers: new Headers({
@@ -91,8 +91,49 @@ export default class Home extends Component {
             console.error(error,"ERRRRRORRR");
         });
       }
+    async addToCart(item){
+        console.log(item);        
+        let cart = [];        
+        let value = await AsyncStorage.getItem('@cart');
+        if(value){
+            cart = null;
+            let storage = JSON.parse(value);
+            console.log(storage);
+            let index = storage.findIndex((e)=>{
+                console.log(e.id+' == '+item.id);
+                return e.id==item.id
+            })
+            console.log(index)
+            if(index>0){
+                console.log(storage[index]);
+                storage[index].quantity = storage[index].quantity+1;
+            }else{
+                cart = storage.concat(item);
+            }          
+            console.log(cart);
+        }else{
+            item.quantity = 1;
+            cart.push(item); 
+        }
+        console.log(cart);
+        await AsyncStorage.setItem('@cart', JSON.stringify(cart));
+        this.setState({
+            countCart: cart.length
+        });
+        
+    }
+    async valToCart(){
+       if(!this.state.countCart){
+            const value = await AsyncStorage.getItem('@cart');
+            if(value !== null) {
+              this.setState({
+                 countCart: JSON.parse(value).length
+              });
+            }
+        }
+    }
     render(){
-        console.log(this.state.isLoading)
+        this.valToCart();
         if(this.state.isLoading){
             return(
                 <Container>
@@ -104,7 +145,7 @@ export default class Home extends Component {
         const {navigate} = this.props.navigation;
         let result = 
               <Container>                
-                <HeaderDefault />
+                <HeaderDefault count={this.state.countCart} navigate={navigate}/>
                     <Form>
                         <Item picker>
                             <Picker
@@ -114,7 +155,7 @@ export default class Home extends Component {
                             >
                             {
                                 this.state.categories.map((categories,i) => (
-                                    <Picker.Item label={categories.name} value={categories.id} />
+                                    <Picker.Item label={categories.name} value={categories.id} key={i} />
                                 ))
                             }
                             </Picker>
@@ -123,34 +164,33 @@ export default class Home extends Component {
                 <Content>
                  {
                     this.state.products.map((products,i) => (
-                    
                     <Card style={{flex: 0}} key={i}>
-                            <CardItem>
-                                <Image source={{uri: products.images[0].src}} style={{height: 200, width: '100%', flex: 1}}/>             
-                            </CardItem>
-                            <CardItem>
-                                <Body>
-                                    <Title>{products.name}</Title>
-                                    <Text>
-                                    {products.name}
-                                    </Text>
-                                </Body>
-                            </CardItem>
-                            <CardItem>
-                              <Left>
-                                <Button transparent textStyle={{color: '#87838B'}}>
-                                  <Icon name="eye" />
-                                  <Text>Ver más</Text>
-                                </Button>
-                              </Left>
-                              <Right>
-                                <Button transparent textStyle={{color: '#87838B'}} onPress={()=>this.props.navigation.navigate('Login')}>
-                                  <Icon name="cart" />
-                                  <Text>Comprar</Text>
-                                </Button>
-                              </Right>
-                            </CardItem>
-                        </Card>
+                        <CardItem cardBody>
+                            <Image source={products.images[0].src?{uri: products.images[0].src}:{uri: 'https://noticiasbancarias.com/wp-content/plugins/accelerated-mobile-pages/images/SD-default-image.png'}} style={{height: 200, width: '100%', flex: 1, resizeMode: 'contain', alignSelf: 'stretch'}}/>             
+                        </CardItem>
+                        <CardItem>
+                            <Body>
+                                <Title>{products.name}</Title>
+                                <Text>
+                                {products.name}
+                                </Text>
+                            </Body>
+                        </CardItem>
+                        <CardItem>
+                          <Left>
+                            <Button transparent textStyle={{color: '#87838B'}} onPress={()=>this.props.navigation.navigate('Detail',{product: products})}>
+                              <Icon name="eye" />
+                              <Text>Ver más</Text>
+                            </Button>
+                          </Left>
+                          <Right>
+                            <Button transparent textStyle={{color: '#87838B'}} onPress={()=>this.addToCart(products)}>
+                              <Icon name="cart" />
+                              <Text>Comprar</Text>
+                            </Button>
+                          </Right>
+                        </CardItem>
+                    </Card>
                     ))
                  }        
                 </Content>

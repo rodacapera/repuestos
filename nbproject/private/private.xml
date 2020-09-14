@@ -3,11 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/teranov/Desktop/proyectos/repuestos/src/App.js</file>
+            <file>file:/Users/teranov/Desktop/proyectos/repuestos/src/modules/home/components/Header.js</file>
             <file>file:/Users/teranov/Desktop/proyectos/repuestos/src/modules/home/containers/Home.js</file>
-            <file>file:/Users/teranov/Desktop/proyectos/repuestos/src/modules/login/containers/Register.js</file>
-            <file>file:/Users/teranov/Desktop/proyectos/repuestos/src/modules/login/containers/Login.js</file>
-            <file>file:/Users/teranov/Desktop/proyectos/repuestos/App.js</file>
         </group>
     </open-files>
 </project-private>

@@ -5,6 +5,8 @@ import { createStackNavigator } from 'react-navigation-stack';
 import Register from './modules/login/containers/Register';
 import Login from './modules/login/containers/Login';
 import Home from './modules/home/containers/Home';
+import Detail from './modules/home/containers/Detail';
+import Cart from './modules/cart/containers/Cart';
 
 const LoginNavigator = createStackNavigator({
     Login: {
@@ -20,7 +22,7 @@ const LoginNavigator = createStackNavigator({
             headerShown: true,
             title: 'Home',
             headerStyle: {
-                backgroundColor: '#C7C8CE',
+                backgroundColor: '#C7C8CE'
             },
         }
     },
@@ -29,6 +31,28 @@ const LoginNavigator = createStackNavigator({
         navigationOptions: {
             headerShown: false,
             title: 'prueba'
+        }
+    },
+    Detail: {
+        screen: Detail,
+        navigationOptions: {
+            headerShown: true,
+            title: 'Volver',
+            headerTintColor: 'white',
+            headerStyle: {
+                backgroundColor: 'rgb(63, 81, 181)'
+            },
+        }
+    },
+    Cart: {
+        screen: Cart,
+        navigationOptions: {
+            headerShown: true,
+            title: 'Volver',
+            headerTintColor: 'white',
+            headerStyle: {
+                backgroundColor: 'rgb(63, 81, 181)'
+            },
         }
     }
 },

@@ -22,7 +22,7 @@ export default class Login extends Component {
                     <Item floatingLabel>
                       <Icon active name="name" ios='ios-lock' android="md-lock"/>
                       <Label>Password</Label>
-                      <Input />
+                      <Input secureTextEntry />
                     </Item>
                 </Body>
               </CardItem>
