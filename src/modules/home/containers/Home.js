@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { StatusBar, StyleSheet, View, ImageBackground, Alert, ActivityIndicator, Image, AsyncStorage } from 'react-native';
-import { Container, Header, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Left, Right, Title, Picker, Spinner } from 'native-base';
+import { Container, Header, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Left, Right, Title, Picker, Spinner, H1 } from 'native-base';
 import {decode, encode} from 'base-64';
 
 import HeaderDefault from '../components/Header';
@@ -161,13 +161,11 @@ export default class Home extends Component {
                     <Card style={{flex: 0}} key={i}>
                         <CardItem cardBody>
                             <Image source={products.images[0].src?{uri: products.images[0].src}:{uri: 'https://noticiasbancarias.com/wp-content/plugins/accelerated-mobile-pages/images/SD-default-image.png'}} style={{height: 200, width: '100%', flex: 1, resizeMode: 'contain', alignSelf: 'stretch'}}/>             
+                            <Title style={{color: 'green', elevation: 10, position: 'absolute',right: 20, bottom: 2, alignSelf: "center"}}> $ {products.price}</Title>
                         </CardItem>
                         <CardItem>
                             <Body>
-                                <Title>{products.name}</Title>
-                                <Text>
-                                {products.name}
-                                </Text>
+                            <H1>{products.name}</H1>                               
                             </Body>
                         </CardItem>
                         <CardItem>
@@ -192,50 +190,3 @@ export default class Home extends Component {
         return(result);
     }
 }
-const styles = StyleSheet.create({
-  bgGray: {
-      backgroundColor: '#00148A',
-  },
-  textCenter: {
-    textAlign: 'center',
-    width: '100%',
-    fontWeight: 'bold',
-    fontSize: 19
-  },
-  content: {
-      flex: 1,
-      justifyContent: 'center',
-  },
-  bodyCard: {
-      borderColor: 'transparent',
-      borderStyle: 'dashed',
-      borderBottomColor: 'transparent',
-      borderTopColor: 'transparent',     
-  },
-  bgCardItem: {
-      backgroundColor: 'rgba(255, 255, 255, 0.6)',
-      borderColor: 'transparent',
-      borderStyle: 'dashed',
-      borderRadius: 0,      
-  },
-  bgCard: {
-    backgroundColor: 'transparent',
-    borderRadius: 3,
-    height: 320,
-    borderColor: 'transparent',
-  },
-  buttonRight: {
-      left: '0%',
-  },
-  buttonLeft: {
-      right: '0%',
-      marginRight: 20,
-      marginLeft: 20
-  },
-  container: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

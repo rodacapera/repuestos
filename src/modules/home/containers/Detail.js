@@ -44,10 +44,11 @@ export default class Detail extends Component {
                         <Card style={{flex: 0}} key={i}>
                             <CardItem cardBody>
                                 <Image source={products.images[0].src?{uri: products.images[0].src}:{uri: 'https://noticiasbancarias.com/wp-content/plugins/accelerated-mobile-pages/images/SD-default-image.png'}} style={{height: 200, width: '100%', flex: 1, resizeMode: 'contain', alignSelf: 'stretch'}}/>             
+                                <Title style={{color: 'green', elevation: 10, position: 'absolute',right: 20, bottom: 2, alignSelf: "center"}}> $ {products.price}</Title>
                             </CardItem>
                             <CardItem>
                                 <Body>                                
-                                    <Text style={{fontWeight: 'bold', fontSize: 28, textTransform: 'uppercase'}}>
+                                    <Text style={{fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase'}}>
                                     {products.name}
                                     </Text>
                                     <Text>
@@ -72,8 +73,3 @@ export default class Detail extends Component {
         return(result);
     }
 }
-const styles = StyleSheet.create({
-  bgGray: {
-      backgroundColor: '#00148A',
-  },
-});
