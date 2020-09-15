@@ -11,25 +11,27 @@ export default class Detail extends Component {
         };
     }
     async addToCart(item){
-        console.log(item);
         let cart = [];        
         let value = await AsyncStorage.getItem('@cart');
         if(value){
             cart = null;
             let storage = JSON.parse(value);
-            console.log(storage);
-            cart = storage.concat(item);
-            console.log(cart);
-        }else{
+            let index = storage.findIndex((e)=>{return e.id==item.id});
+            if(index>=0){
+                storage[index].quantity = storage[index].quantity+1;
+                cart = storage;
+            }else{
+                item.quantity = 1;
+                cart = storage.concat(item);
+            }
+        }else{            
+            item.quantity = 1;
             cart.push(item); 
         }
-        console.log(cart);
         await AsyncStorage.setItem('@cart', JSON.stringify(cart));
         this.setState({
             countCart: cart.length
         });
-        console.log('redirecionando');
-        console.log(this.props.navigation);
         this.props.navigation.navigate('Cart');
     }
     render(){

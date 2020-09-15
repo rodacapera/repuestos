@@ -1,7 +1,17 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, Alert, Image, ActivityIndicator, AsyncStorage } from 'react-native';
 import { Container, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Badge, Right } from 'native-base';
+import {decode, encode} from 'base-64';
+var WooCommerceAPI = require('react-native-woocommerce-api');
 
+const WooCommerce = new WooCommerceAPI({
+       url: 'http://modablackshop.tk/',
+       consumerKey: 'ck_2d8f90d8f645239ad5ad73d93348f0484c159188',
+       consumerSecret: 'cs_84d6ea062b5846e0105c83e87f436bf6856cdfe6',
+       wpAPI: true,
+       version: 'wc/v3',
+       queryStringAuth: true
+});
 export default class Cart extends Component {
     constructor(props){
         super(props);        
@@ -17,7 +27,13 @@ export default class Cart extends Component {
           postcode: "110011",
           country: "CO",
           email: "",
-          phone: ""
+          phone: "",          
+          line_items: [],
+          shipping_lines:[{
+              method_id: "",
+              method_title: "",
+              total: ""
+          }]
         };
     }
     async getToCart(){    
@@ -27,37 +43,28 @@ export default class Cart extends Component {
         }
     } 
     async delete(id){
-        console.log('borrar: '+id);
         const value = JSON.parse(await AsyncStorage.getItem('@cart'));
         let index = value.findIndex((e)=>{return e.id==id});
-        console.log(index);
         if(index !== -1){
-            console.log('removiendo indice: '+index);
-            console.log(value);
             value.splice(index, 1);
         }
-        console.log(value.length);
         if(value.length<=0){
-            console.log('removiendo storage');
             await AsyncStorage.removeItem('@cart');
             this.props.navigation.goBack();
         }else{
-            console.log('seteando storage');
-            await AsyncStorage.setItem('@cart', value);
+            await AsyncStorage.setItem('@cart', JSON.stringify(value));
         }
         this.setState({cart: value, loader: false, countCart: value.length});
     }
-    pay(){
-        console.log('pagar');
+    async pay(){        
+        const value = JSON.parse(await AsyncStorage.getItem('@cart'));
         const items = null
-        this.state.cart.forEach((value,i)=>{
-            items = {product_id: value.id, quantity: value.quantity}
-        });
+        value.forEach((value,i)=>{this.state.line_items.push({product_id: value.id, quantity: value.quantity});});
         const data = {
             payment_method: "cod",
             payment_method_title: "Cash on delivery",
             set_paid: true,
-            billing: {
+            billing: {//datos de factura
               first_name: this.state.first_name,
               last_name: this.state.last_name,
               address_1: this.state.address_1,
@@ -69,7 +76,7 @@ export default class Cart extends Component {
               email: this.state.email,
               phone: this.state.phone
             },
-            shipping: {
+            shipping: {//datos del envio
               first_name: this.state.first_name,
               last_name: this.state.last_name,
               address_1: this.state.address_1,
@@ -79,30 +86,41 @@ export default class Cart extends Component {
               postcode: this.state.postcode,
               country: this.state.country,
             },
-            line_items: [
-              {
-                product_id: 93,
-                quantity: 2
-              },
-              {
-                product_id: 22,
-                variation_id: 23,
-                quantity: 1
-              }
-            ],
-            shipping_lines: [
-              {
-                method_id: "flat_rate",
-                method_title: "Flat Rate",
-                total: 10
-              }
-            ]
+            line_items: this.state.line_items//productos comprados,
           };
+        WooCommerce.post('orders', data)
+        .then(data => {
+            this.setData();
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+    async setData(){
+       await AsyncStorage.removeItem('@cart');
+       this.setState({
+          first_name: "",
+          last_name: "",
+          address_1: "",
+          address_2: "",
+          city: "Bogotá",
+          state: "CU",
+          postcode: "110011",
+          country: "CO",
+          email: "",
+          phone: "",          
+          line_items: [],
+          shipping_lines:{
+              method_id: "",
+              method_title: "",
+              total: ""
+          }
+       });
+       this.props.navigation.goBack();
     }
     render(){
         this.getToCart();
         const {navigate} = this.props.navigation;
-        
         if(this.state.loader){
             return(
                 <Container>
@@ -145,17 +163,17 @@ export default class Cart extends Component {
                               <Item floatingLabel style={{marginTop: 10}}>
                                 <Icon active name="name" ios='ios-person' android="md-create"/>
                                 <Label>Nombres</Label>
-                                <Input  />
+                                <Input onChangeText={(text) =>{this.state.first_name = text}} />
                               </Item>
                               <Item floatingLabel style={{marginTop: 10}}>
                                 <Icon active name="name" ios='ios-person' android="md-create"/>
                                 <Label>Apellidos</Label>
-                                <Input  />
+                                <Input onChangeText={(text) =>{this.state.last_name = text}} />
                               </Item>
                               <Item floatingLabel style={{marginTop: 10}}>
                                 <Icon active name="name" ios='ios-person' android="md-mail"/>
                                 <Label>Correo</Label>
-                                <Input keyboardType="email-address" />
+                                <Input keyboardType="email-address" onChangeText={(text) =>{this.state.email = text}} />
                               </Item>
                               <Item floatingLabel style={{marginTop: 10}}>
                                 <Icon active name="name" ios='ios-person' android="md-person"/>
@@ -165,12 +183,12 @@ export default class Cart extends Component {
                               <Item floatingLabel style={{marginTop: 10}}>
                                 <Icon active name="name" ios='ios-lock' android="md-lock"/>
                                 <Label>Teléfono</Label>
-                                <Input keyboardType="phone-pad" />
+                                <Input keyboardType="phone-pad" onChangeText={(text) =>{this.state.phone = text}} />
                               </Item>
                           </Body>
                         </CardItem>
                         <CardItem footer style={[styles.bgCardItem,styles.right]}>
-                          <Button primary style={{margin: 10}}><Text> Comprar </Text></Button>   
+                          <Button primary style={{margin: 10}} onPress={()=>this.pay()}><Text> Comprar </Text></Button>   
                         </CardItem>
                     </Card>
                     

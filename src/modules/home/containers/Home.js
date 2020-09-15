@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { StatusBar, StyleSheet, View, ImageBackground, Alert, ActivityIndicator, Image, AsyncStorage } from 'react-native';
 import { Container, Header, Content, Card, CardItem, Body, Text, Button, Form, Item, Label, Input, Icon, Left, Right, Title, Picker, Spinner } from 'native-base';
-import {decode, encode} from 'base-64'
+import {decode, encode} from 'base-64';
 
 import HeaderDefault from '../components/Header';
 
@@ -24,20 +24,13 @@ export default class Home extends Component {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }), 
         })
-          .then(response => {              
+        .then(response => {              
               return response.json();
-          })
-          .then(response =>{
-              this.setState({
-                  categories: response,
-                  isLoading: false
-              },()=>{
-//                  console.log('seteo la variable');
-                  console.log(this.state.categories);
-                }
-              );
-          })
-          .catch((error) => {
+        })
+        .then(response =>{
+            this.setState({categories: response});
+        })
+        .catch((error) => {
             console.error(error,"ERRRRRORRR");
           });
         fetch('http://modablackshop.tk/wp-json/wc/v3/products?per_page=100',{ 
@@ -52,19 +45,18 @@ export default class Home extends Component {
           })
           .then(response =>{
               this.setState({
-                  products: response,
+                  products: response, 
                   isLoading: false
               },()=>{
-//                  console.log('seteo la variable');
-                  console.log(this.state.products);
+                  this.valToCart();            
                 }
               );
           })
           .catch((error) => {
             console.error(error,"ERRRRRORRR");
           }); 
-        this.valToCart();        
-    }
+                
+    }    
     onValueChange2(value) {
         this.setState({isLoading: true });      
         fetch('http://modablackshop.tk/wp-json/wc/v3/products?category='+value,{ 
@@ -82,48 +74,32 @@ export default class Home extends Component {
                   products: response,
                   isLoading: false,
                   selected2: value
-              },()=>{
-//                  console.log('seteo la variable');
-                  console.log(this.state.products);
-                }
-              );
+              });
         })
         .catch((error) => {
             console.error(error,"ERRRRRORRR");
         });
       }
-    async addToCart(item){
-        console.log(item);        
+    async addToCart(item){        
         let cart = [];        
         let value = await AsyncStorage.getItem('@cart');
         if(value){
             cart = null;
             let storage = JSON.parse(value);
-            console.log(storage);
-            let index = storage.findIndex((e)=>{
-                console.log(e.id+' == '+item.id);
-                return e.id==item.id
-            })
-            console.log(index)
+            let index = storage.findIndex((e)=>{return e.id==item.id});
             if(index>=0){
-                console.log(storage[index]);
                 storage[index].quantity = storage[index].quantity+1;
                 cart = storage;
             }else{
                 item.quantity = 1;
                 cart = storage.concat(item);
-            }          
-            console.log(cart);
+            }
         }else{            
             item.quantity = 1;
             cart.push(item); 
         }
-        console.log(cart);
         await AsyncStorage.setItem('@cart', JSON.stringify(cart));
-        this.setState({
-            countCart: cart.length
-        });
-        
+        this.setState({countCart: cart.length});
     }
     async valToCart(){
        if(!this.state.countCart){
@@ -140,26 +116,19 @@ export default class Home extends Component {
         this.props.navigation.addListener('didFocus', async () => {
             let count = JSON.parse(await AsyncStorage.getItem('@cart'));
             if(count && count.length==0){
-                console.log('a')
                 count = 0;
             }else{
-                console.log('b');
-                console.log(count);
                 if(count){
                     count = count.length;
                 }else{
                     count = 0;
                 }
-                
             }
-            this.setState({ countCart: count },()=>{
-                console.log('termino de setear');
-            });
+            this.setState({ countCart: count });
         });
     }
     render(){        
         const {navigate} = this.props.navigation;
-        console.log('2222')
         if(this.state.isLoading){
             return(
                 <Container>
